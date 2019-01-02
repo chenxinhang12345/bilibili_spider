@@ -1,5 +1,5 @@
-Purpose: 
-Download the cover image and video content from bilibili video link
+Purpose:  
+Download the cover image and video content from bilibili video link 
 Requirement: 
 BeautifulSoup4, Requests Library, Python 3.7 installed 
 You can 
