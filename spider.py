@@ -78,4 +78,4 @@ url = sys.argv[1]
 #url = "https://www.bilibili.com/video/av10227994?from=search&seid=7268245292007641644"
 soup = init_soup(url)
 download_video(soup,url)
-#download_image(soup)
+download_image(soup)
