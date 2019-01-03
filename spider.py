@@ -46,9 +46,7 @@ def download_video(soup, url):
     for text in text_list:
         if 'http://' in text:
             video_url = text
-    print(video_url)
     host = video_url.split('/')[2]
-    print(host)
     kv = {
         'user-agent': user_agent,
         'accept-Encoding': 'gzip, deflate, br',
@@ -59,17 +57,28 @@ def download_video(soup, url):
     }
     video_path = './video'
     full_path = video_path + '/'+video_url.split('/')[-1].split('?e')[0]
-    print(full_path)
     try:
         if not os.path.exists(video_path):
             os.mkdir(video_path)
         if not os.path.exists(full_path):
             r = requests.get(video_url,headers = kv,verify = False, stream = True)
             r.raise_for_status()
-            print(r.request.headers)
             with open(full_path,'wb') as f:
-                f.write(r.content)
+                length = r.headers.get('content-length')
+                if length is None:
+                    f.write(r.content)
+                else:
+                    progress = 0
+                    for data in r.iter_content(chunk_size=4096):
+                        progress+=len(data)
+                        f.write(data)
+                        percentage = progress*1.0/int(length)
+                        num = (int)(percentage*50)
+                        sys.stdout.write('\rDownloading ['+num*'#'+(50-num)*' '+']'+str(int(percentage*100))+'%')
+                        sys.stdout.flush()
+
                 f.close()
+                sys.stdout.write(' Download successful.')
         else:
             print('file already exist')
     except:
