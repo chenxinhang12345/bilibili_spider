@@ -11,3 +11,4 @@ Usage:
 &python3 spider.py url(the link to the video, just copy and paste)
 ```
 The crawler will automatically store .flv format video in ./video and cover image in ./image.
+ Current Bug: Can not download video with multiple sections ie. bangumi need sign
