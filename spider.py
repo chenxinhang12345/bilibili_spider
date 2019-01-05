@@ -2,6 +2,7 @@ import requests
 import os
 import sys
 from bs4 import BeautifulSoup as bs
+from pdb import set_trace as bp
 #Cover: <meta data-vue-meta="true" property="og:image" content=".jpg">
 #Content of video: <script>
 user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'
@@ -39,13 +40,15 @@ def download_image(soup):
             print('file already exist')
     except:
         print('failed to download..:'+str(rimage.status_code))
-def download_video(soup, url):
+def download_video(soup, url,name):
     script = soup.find_all('script')[2].string
-    video_url = ''
     text_list = script.split('"')
+    i = 1
     for text in text_list:
         if 'http://' in text:
-            video_url = text
+            download_section(text,url,'part'+str(i),name)
+            i+=1
+def download_section(video_url,url,eachname,name):    
     host = video_url.split('/')[2]
     kv = {
         'user-agent': user_agent,
@@ -56,12 +59,16 @@ def download_video(soup, url):
           'Referer': url
     }
     video_path = './video'
-    full_path = video_path + '/'+video_url.split('/')[-1].split('?e')[0]
+    video_subpath = video_path+'/'+name
+    full_path = video_subpath+'/'+eachname+'.flv'
     try:
         if not os.path.exists(video_path):
             os.mkdir(video_path)
+        if not os.path.exists(video_subpath):
+            os.mkdir(video_subpath)
         if not os.path.exists(full_path):
             r = requests.get(video_url,headers = kv,verify = False, stream = True)
+            #bp()
             r.raise_for_status()
             with open(full_path,'wb') as f:
                 length = r.headers.get('content-length')
@@ -76,15 +83,17 @@ def download_video(soup, url):
                         num = (int)(percentage*50)
                         sys.stdout.write('\rDownloading ['+num*'#'+(50-num)*' '+']'+str(int(percentage*100))+'%')
                         sys.stdout.flush()
-
                 f.close()
-                sys.stdout.write(' Download successful.')
+                sys.stdout.write(' Download '+eachname+' successful.')
         else:
             print('file already exist')
     except:
         print('failed to download..:'+str(r.status_code))
-url = sys.argv[1]
-#url = "https://www.bilibili.com/video/av10227994?from=search&seid=7268245292007641644"
-soup = init_soup(url)
-download_video(soup,url)
-download_image(soup)
+def main():
+    url = sys.argv[1]
+    name = url.split('?')[0].split('/')[-1]
+    #url = "https://www.bilibili.com/video/av10227994?from=search&seid=7268245292007641644"
+    soup = init_soup(url)
+    download_video(soup,url,name)
+    download_image(soup)
+main()
